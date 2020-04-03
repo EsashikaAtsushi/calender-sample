@@ -1,7 +1,7 @@
 <template>
   <div class="calender-wrap">
     <div class="nav">
-      <h1>Vue Calender Sample</h1>
+      <h1>Calender Sample</h1>
       <div>
         <span>{{ target.getFullYear() + "年" + (target.getMonth() + 1) + "月"}}</span>
         <button @click="shiftTargetDate(-1)">
@@ -27,6 +27,7 @@
             :class="addStyleToDate(getCalenderDate(firstDay, (i+7*(numOfRow-1)-1)))"
           >
             <span>{{getCalenderDate(firstDay, (i+7*(numOfRow-1)-1)).getDate()}}</span>
+            <p>{{getHoliday(getCalenderDate(firstDay, (i+7*(numOfRow-1)-1)))}}</p>
           </div>
         </div>
       </div>
@@ -35,7 +36,9 @@
 </template>
 
 <script>
+import holidaysJp from '@holiday-jp/holiday_jp'
 const dtToday = new Date()
+
 export default {
   data: function () {
     return {
@@ -54,6 +57,22 @@ export default {
       let day
       this.target.getDay() === 0 ? (day = -5) : (day = 2 - this.target.getDay())
       return new Date(this.target.getFullYear(), this.target.getMonth(), day)
+    },
+
+    /**
+     *  カレンダーに表示する範囲の日付の祝日リスト
+     */
+    holidays: function () {
+      let holidays
+      holidays = holidaysJp.between(
+        this.firstDay,
+        new Date(
+          this.firstDay.getFullYear(),
+          this.firstDay.getMonth(),
+          this.firstDay.getDate() + 40
+        )
+      )
+      return holidays
     }
   },
   methods: {
@@ -74,6 +93,7 @@ export default {
      */
     selectTargetDate: function (date) {
       this.target = new Date(date.getFullYear(), date.getMonth(), 1)
+      console.log(this.holidays)
     },
 
     /**
@@ -97,15 +117,28 @@ export default {
     },
 
     /**
-     * 引数のdateオブジェクトの日付がtodayと同日かチェックする
+     * 引数のdateオブジェクト同士が同一の年月日かチェックする
+     * @param {date1} チェック対象のdate
+     * @param {date2} チェック対象のdate
+     */
+    compareDate (date1, date2) {
+      return (
+        date1.getFullYear() === date2.getFullYear() &&
+        date1.getMonth() === date2.getMonth() &&
+        date1.getDate() === date2.getDate()
+      )
+    },
+
+    /**
+     * 引数のdateオブジェクトの日付がthis.hodidaysのDateに含まれているかチェックする
+     * 含まれている場合は休日の名称を文字列で返す
      * @param {date} チェック対象のdate
      */
-    checkThisDate (date) {
-      return (
-        (date.getFullYear() === this.today.getFullYear()) &
-        (date.getMonth() === this.today.getMonth()) &
-        (date.getDate() === this.today.getDate())
+    getHoliday (targetDate) {
+      const match = this.holidays.find(({ date }) =>
+        this.compareDate(date, targetDate)
       )
+      return match ? match.name : null
     },
 
     /**
@@ -115,7 +148,7 @@ export default {
     addStyleToDate (date) {
       let value = []
       if (this.checkThisMonth(date)) value.push('this-month')
-      if (this.checkThisDate(date)) value.push('today')
+      if (this.compareDate(date, this.today)) value.push('today')
       return value.join(' ')
     }
   }
@@ -141,6 +174,9 @@ export default {
   display: flex;
   align-items: baseline;
 }
+.nav h1 {
+  font-size: 22px;
+}
 .nav > div {
   margin-left: auto;
 }
@@ -156,7 +192,7 @@ export default {
 .nav .select-today {
   border: #bbbbbb solid 1px;
   border-radius: 5px;
-  padding: 3px 5px;
+  padding: 5px;
 }
 .calender {
   font-size: 12px;
@@ -197,15 +233,17 @@ export default {
 }
 .body .col {
   padding-top: 5px;
-  line-height: 25px;
+  line-height: 20px;
 }
 .this-month {
   color: #545454;
 }
 .today span {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
+  color: white;
+  display: inline-block;
   border-radius: 50%;
-  background-color: #d1f5d3;
+  background-color: #9dc6a7;
 }
 </style>
