@@ -54,8 +54,7 @@ export default {
      *  カレンダーに表示する最初の月曜日の日付オブジェクト
      */
     firstDay: function () {
-      let day
-      this.target.getDay() === 0 ? (day = -5) : (day = 2 - this.target.getDay())
+      const day = this.target.getDay() === 0 ? -5 : 2 - this.target.getDay()
       return new Date(this.target.getFullYear(), this.target.getMonth(), day)
     },
 
@@ -63,8 +62,7 @@ export default {
      *  カレンダーに表示する範囲の日付の祝日リスト
      */
     holidays: function () {
-      let holidays
-      holidays = holidaysJp.between(
+      return holidaysJp.between(
         this.firstDay,
         new Date(
           this.firstDay.getFullYear(),
@@ -72,7 +70,6 @@ export default {
           this.firstDay.getDate() + 40
         )
       )
-      return holidays
     }
   },
   methods: {
@@ -82,7 +79,7 @@ export default {
      * @param {number} add 戻り値に追加する日付
      */
     getCalenderDate: function (targetFirstDay, add) {
-      let date = new Date(targetFirstDay)
+      const date = new Date(targetFirstDay)
       date.setDate(date.getDate() + add)
       return date
     },
@@ -146,7 +143,7 @@ export default {
      * @param {date} チェック対象のdate
      */
     addStyleToDate (date) {
-      let value = []
+      const value = []
       if (this.checkThisMonth(date)) value.push('this-month')
       if (this.compareDate(date, this.today)) value.push('today')
       return value.join(' ')
